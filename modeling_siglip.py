@@ -16,7 +16,7 @@ class SiglipVisionConfig:
         layer_norm_eps=1e-6,
         attention_dropout=0.0,
         num_image_tokens: int = None,
-        **kwargs
+        **kwargs,
     ) -> None:
         super().__init__()
         self.hidden_size = hidden_size
@@ -71,6 +71,23 @@ class SiglipAttention(nn.Module):
         value_states = value_states.view(
             batch_size, seq_len, self.num_heads, self.head_dim
         ).transpose(1, 2)
+        attn_weight = (
+            torch.matmul(query_states, key_states.transpose(2, 3)) * self.scale
+        )
+
+        if attn_weight.size() != (batch_size, self.num_heads, seq_len, seq_len):
+            raise ValueError(
+                f"Attentimo weights should be of size {(batch_size, self.num_heads, seq_len, seq_len)}, but is"
+                f" {attn_weight.size()}"
+            )
+
+        attn_weight = nn.functional.softmax(
+            attn_weight, dim=-1, dtype=torch.float32
+        ).to(query_states.dtype)
+        attn_weight = nn.functional.dropout(
+            attn_weight, p=self.dropout, training=self.training
+        )
+        attn_output = torch.matmul(attn_weight, value_states)
 
 
 class SiglipMLP(nn.Module):
