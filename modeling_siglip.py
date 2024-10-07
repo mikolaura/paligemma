@@ -15,7 +15,7 @@ class SiglipVisionConfig:
         pathch_size=16,
         layer_norm_eps=1e-6,
         attention_dropout=0.0,
-        num_image_tokens: int = None,
+        num_image_tokens: Optional[int] = None,
         **kwargs,
     ) -> None:
         super().__init__()
@@ -89,12 +89,12 @@ class SiglipAttention(nn.Module):
         )
         attn_output = torch.matmul(attn_weight, value_states)
 
-        if attn_output.size() != (batch_size, self.num_heads, seq_len , self.head_dim):
+        if attn_output.size() != (batch_size, self.num_heads, seq_len, self.head_dim):
             raise ValueError(
                 f"`attn_output` should be of size {(batch_size, self.num_heads, seq_len , self.head_dim)}, but is"
                 f" {attn_output.size()}"
             )
-        attn_output = attn_output.transpose(1,2).contiguous()
+        attn_output = attn_output.transpose(1, 2).contiguous()
         attn_output = attn_output.reshape(batch_size, seq_len, self.embed_dim)
         attn_output = self.out_proj(attn_output)
         return attn_output, attn_weight
@@ -133,18 +133,22 @@ class SiglipEncoderLayer(nn.Module):
         hidden_states = residual + hidden_states
         return hidden_states
 
+
 class SiglipEncoder(nn.Module):
-    def __init__(self, config:SiglipVisionConfig):
+    def __init__(self, config: SiglipVisionConfig):
         super().__init__()
         self.config = config
         self.layers = nn.ModuleList(
             [SiglipEncoderLayer(config) for _ in range(config.num_hidden_layers)]
         )
+
     def forward(self, input_embeds):
         hidden_states = input_embeds
         for encoder_layer in self.layers:
             hidden_states = encoder_layer(hidden_states)
         return hidden_states
+
+
 class SiglipVisionEmbeddings(nn.Module):
     def __init__(self, config: SiglipVisionConfig):
         super().__init__()
