@@ -379,10 +379,10 @@ class GemmaModel(nn.Module):
         self,
         attention_mask: Optional[torch.Tensor] = None,
         position_ids: Optional[torch.LongTensor] = None,
-        input_embeds: Optional[torch.FloatTensor] = None,
+        inputs_embeds: Optional[torch.FloatTensor] = None,
         kv_cache: Optional[KVCache] = None,
     ) -> torch.FloatTensor:
-        hidden_states = input_embeds
+        hidden_states = inputs_embeds
         normalizer = torch.tensor(
             self.config.hidden_size**0.5, dtype=hidden_states.dtype
         )
@@ -420,13 +420,13 @@ class GemmaForCausalLM(nn.Module):
         self,
         attention_mask: Optional[torch.Tensor] = None,
         position_ids: Optional[torch.LongTensor] = None,
-        input_embeds: Optional[torch.FloatTensor] = None,
+        inputs_embeds: Optional[torch.FloatTensor] = None,
         kv_cache: Optional[KVCache] = None,
     ) -> Tuple:
         outputs = self.model(
             attention_mask=attention_mask,
             position_ids=position_ids,
-            input_embeds=input_embeds,
+            inputs_embeds=inputs_embeds,
             kv_cache=kv_cache,
         )
         hidden_states = outputs
@@ -495,13 +495,13 @@ class PaliGemmaForConditionalGeneration(nn.Module):
         dtype, device = inputs_embeds.dtype, inputs_embeds.device
         min_dtype = torch.finfo(dtype).min
         q_len = inputs_embeds.shape[1]
-        if kv_cache in None or kv_cache.num_items() == 0:
+        if kv_cache is None or kv_cache.num_items() == 0:
             causal_mask = torch.full(
                 (batch_size, q_len, q_len), fill_value=0, dtype=dtype, device=device
             )
         else:
             assert q_len == 1
-            kv_len = kv_cache.num_items + q_len
+            kv_len = kv_cache.num_items() + q_len
             causal_mask = torch.full(
                 (batch_size, q_len, kv_len), fill_value=0, dtype=dtype, device=device
             )

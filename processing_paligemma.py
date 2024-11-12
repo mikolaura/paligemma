@@ -53,7 +53,7 @@ def proccess_images(
     images = [
         resize(image=image, size=(height, width), resample=resample) for image in images
     ]
-    images = [np.array([image]) for image in images]
+    images = [np.array(image) for image in images]
     images = [rescale(image, scale=rescale_factor) for image in images]
     images = [normalize(image, mean=image_mean, std=image_std) for image in images]
     images = [image.transpose(2, 0, 1) for image in images]

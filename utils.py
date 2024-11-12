@@ -6,7 +6,10 @@ from safetensors import safe_open
 from typing import Tuple
 import os
 
-def load_hf_model(model_path: str, device: str) -> Tuple[PaliGemmaForConditionalGeneration, AutoTokenizer]:
+
+def load_hf_model(
+    model_path: str, device: str
+) -> Tuple[PaliGemmaForConditionalGeneration, AutoTokenizer]:
     # Load the tokenizer
     tokenizer = AutoTokenizer.from_pretrained(model_path, padding_side="right")
     assert tokenizer.padding_side == "right"
@@ -25,10 +28,11 @@ def load_hf_model(model_path: str, device: str) -> Tuple[PaliGemmaForConditional
     with open(os.path.join(model_path, "config.json"), "r") as f:
         model_config_file = json.load(f)
         config = PaliGemmaConfig(**model_config_file)
+        print(model_config_file)
 
     # Create the model using the configuration
     model = PaliGemmaForConditionalGeneration(config).to(device)
-
+    print("Model created")
     # Load the state dict of the model
     model.load_state_dict(tensors, strict=False)
 
