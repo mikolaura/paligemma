@@ -1,4 +1,5 @@
 # Paligemma Clone
+# I method(local)
 ## Download model
 Install weights from ```https://huggingface.co/google/paligemma-3b-pt-224/tree/main``` using git or huggingface
 and after change your ```model_path``` in '''launch_inference.sh''' file 
@@ -13,4 +14,5 @@ pip install -r requirements.txt
 ./launch_inference.sh
 ```
 First of all it would take some time to run, because on automate it run at cpu, but you can change it on '''launch_inference.sh''' file
-
+# II method(on kaggle)
+download ```demo.ipynb``` file and load it kaggle cloud to run it using gpu
